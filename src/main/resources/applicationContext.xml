@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+    <!--com.yuntu.service  com.yuntu.mapper-->
+    <!--使用spring扫描器扫描包下所有的类让注解生效-->
+    <!--若扫描到有@Component、@Controller、@Service等注解的类，则被这些类注册为bean-->
+    <context:component-scan base-package="com.yuntu.service"/>
+    <context:component-scan base-package="com.yuntu.mapper"/>
+    <!--读取数据库配置文件-->
+    <context:property-placeholder location="classpath:database.properties"/>
+    <!--数据源 dbcp的数据库连接池-->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${user}"/>
+        <property name="password" value="${password}"/>
+        <!--初始化连接个数-->
+        <property name="initialSize" value="${initialSize}"/>
+        <!--同时最大的连接数-->
+        <property name="maxTotal" value="${maxActive}"/>
+        <!--允许最大空闲的连接数-->
+        <property name="maxIdle" value="${maxIdle}"/>
+        <!--最小空闲的连接数-->
+        <property name="minIdle" value="${minIdle}"/>
+        <!--最大等待连接的时间，单位毫秒-->
+        <property name="maxWaitMillis" value="${maxWait}"/>
+        <!--配置超出时间-->
+        <property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}"/>
+        <!--是否开始使用无用的连接回收机制-->
+        <property name="removeAbandonedOnBorrow" value="${removeAbandoned}"/>
+        <property name="removeAbandonedOnMaintenance" value="${removeAbandoned}"/>
+        <!--sql心跳包-->
+        <!--定义开启evict的数据校验，循环校验-->
+        <property name="testWhileIdle" value="true"/>
+        <!--拿到连接是否开启校验-->
+        <property name="testOnBorrow" value="false"/>
+        <!--返回连接是否开启校验-->
+        <property name="testOnReturn" value="false"/>
+        <!--定义校验所使用的sql语句-->
+        <property name="validationQuery" value="select 1"/>
+        <!--第一个的时间间隔，大于0时视为启动状态  单位：毫秒-->
+        <property name="timeBetweenEvictionRunsMillis" value="60000"/>
+        <!--定义每次校验的连接数-->
+        <property name="numTestsPerEvictionRun" value="100"/>
+    </bean>
+    <!--事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--AOP事务处理-->
+    <!--开启AOP-->
+    <aop:aspectj-autoproxy/>
+    <!--事务的切面-->
+    <aop:config proxy-target-class="true">
+        <aop:pointcut id="serviceMethod" expression="execution(* com.yuntu.service..*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="serviceMethod"/>
+    </aop:config>
+    <!--AOP 事务管理器的连接 事务机制-->
+    <tx:advice id="txAdvice">
+        <tx:attributes>
+            <tx:method name="yuntu*" propagation="REQUIRED" rollback-for="Excetion"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--SqlSessionFactory工厂-->
+    <bean id="SqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--引用数据源组件-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--引入Mybatis配置文件-->
+        <property name="configLocation" value="classpath:Mybatis-config.xml"/>
+        <!--配置Mapper注册-->
+        <property name="mapperLocations">
+            <list>
+                <value>classpath:com/yuntu/mapper/**/*.xml</value>
+            </list>
+        </property>
+    </bean>
+    <!--Mapper扫描器 替代以上-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.yuntu.mapper"/>
+    </bean>
+</beans>

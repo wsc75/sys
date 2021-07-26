@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yuntu.mapper.Animal.AnimalMapper">
+
+
+    <select id="getCount" resultType="int">
+        select count(1) from Animal a inner join Kind k on a.a_k_id=k.k_id;
+    </select>
+
+    <select id="getPageAll" resultType="Animal">
+        select a.*,k.k_name from Animal a inner join Kind k on a.a_k_id=k.k_id order by a.a_id desc limit #{pageindex},#{pagesize}
+    </select>
+
+    <delete id="delAnimal" parameterType="int">
+        delete from Animal where a_id =#{a_id};
+    </delete>
+
+    <insert id="addAnimal" parameterType="Animal">
+        insert into Animal(a_name,a_sex,a_k_id,a_age,a_health,a_date) values (#{a_name},#{a_sex},#{a_k_id},#{a_age},#{a_health},#{a_date});
+    </insert>
+
+    <select id="checkName" parameterType="String" resultType="Animal">
+        select * from Animal where a_name = #{a_name};
+    </select>
+
+    <select id="getAnimal" resultType="Animal" parameterType="int">
+        select * from Animal where a_id =#{a_id};
+    </select>
+
+    <update id="updAnimal" parameterType="Animal">
+        update Animal set a_name=#{a_name},a_sex=#{a_sex},a_k_id=#{a_k_id},a_age=#{a_age},a_health=#{a_health},a_date=#{a_date} where a_id = #{a_id};
+    </update>
+</mapper>

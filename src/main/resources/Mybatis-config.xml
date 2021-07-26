@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--导包-->
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!--通过这个配置文件可以完成Mybatis与数据库的连接-->
+<configuration>
+    <!--懒加载-->
+    <settings>
+        <setting name="lazyLoadingEnabled" value="false"/>
+    </settings>
+    <!--别名注册-->
+    <typeAliases>
+        <package name="com.yuntu.pojo"/>
+    </typeAliases>
+</configuration>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--自定义转换器-->
+    <bean id="myConversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <list>
+                <bean class="com.yuntu.tools.StringToDateConverter">
+                    <constructor-arg type="java.lang.String" value="yyyy-MM-dd"/>
+                </bean>
+            </list>
+        </property>
+    </bean>
+    <!--一键式配置控制器-->
+    <mvc:annotation-driven conversion-service="myConversionService">
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <value>application/json;charset=utf-8</value>
+                </property>
+            </bean>
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/json;charset=utf-8</value>
+                        <value>application/json</value>
+                    </list>
+                </property>
+                <property name="features">
+                    <list>
+                        <value>WriteDateUseDateFormat</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!--加载静态文件-->
+    <mvc:resources mapping="/statics/**" location="/statics/"/>
+
+    <!--扫描当前包下控制器注解   在当前包下加入控制器注解的驱动-->
+    <context:component-scan base-package="com.yuntu.controller"/>
+    <!--全局异常-->
+    <!--<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                <prop key="java.lang.RuntimeException">401</prop>
+            </props>
+        </property>
+    </bean>-->
+    <!--多视图解析器-->
+    <!--<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="mediaTypes">
+            <value>
+            html=textml
+            json=application/json
+            xml=application/xml
+            </value>
+        </property>
+    </bean>
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        &lt;!&ndash;开启request参数识别&ndash;&gt;
+        <property name="useNotAcceptableStatusCode" value="true"/>
+        <property name="contentNegotiationManager" ref="contentNegotiationManager"/>
+        <property name="viewResolvers">
+            <list>
+            <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                <property name="prefix" value="/WEB-INF/jsp/"/>
+                <property name="suffix" value=".jsp"/>
+            </bean>
+            </list>
+        </property>
+    </bean>-->
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="favorParameter" value="true"/>
+        <property name="mediaTypes"><!--响应的映射关系-->
+            <map>
+                <entry key="html" value="text/html;charset=utf-8"/>
+                <entry key="json" value="application/json;charset=utf-8"/>
+                <entry key="xml" value="application/xml;charset=utf-8"/>
+            </map>
+        </property>
+        <!--        配置视图解析器 -->
+        <property name="viewResolvers">
+            <list>
+            <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                <property name="prefix" value="/WEB-INF/jsp/"/>
+                <property name="suffix" value=".jsp"/>
+            </bean>
+            </list>
+        </property>
+    </bean>
+    <!--上传文件解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="5000000"/>
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
+    <!--拦截器-->
+    <!--<mvc:interceptors>
+        <mvc:interceptor>
+            &lt;!&ndash;登陆、注册、首页等&ndash;&gt;
+            <mvc:mapping path="/sys/**"/>
+            <bean class="com.yuntu.interceptor.SysInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>-->
+</beans>
